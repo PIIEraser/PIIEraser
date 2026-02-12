@@ -1,0 +1,223 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'PII Eraser: Common Resources (LB, IAM, Cluster)'
+
+Parameters:
+  VpcId:
+    Type: String
+  SubnetIds:
+    Type: CommaDelimitedList
+  StackNamePrefix:
+    Type: String
+  RequestTimeout:
+    Type: Number
+
+Resources:
+  # --- IAM Roles ---
+  EcsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  EcsTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ecs-tasks.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSMarketplaceMeteringRegisterUsage
+      Policies:
+        - PolicyName: PIIEraserLogging
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt LogGroup.Arn
+
+  # --- Logs ---
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${StackNamePrefix}"
+      RetentionInDays: 30
+
+  # --- Security Groups ---
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow internal HTTP to ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 10.0.0.0/8  # Restrict this to your specific VPC CIDR or VPN IP range
+
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow traffic from ALB to Container
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+
+  # --- Load Balancer (Internal) ---
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub "${StackNamePrefix}-alb"
+      Scheme: internal
+      Subnets: !Ref SubnetIds
+      SecurityGroups: [!Ref AlbSecurityGroup]
+      Type: application
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: !Ref RequestTimeout
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${StackNamePrefix}-tg"
+      VpcId: !Ref VpcId
+      Port: 8000
+      Protocol: HTTP
+      TargetType: ip
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 30
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 3
+      Matcher: { HttpCode: '200' }
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: !Ref RequestTimeout
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  # --- ECS Cluster ---
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${StackNamePrefix}-cluster"
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+
+# --- Test Utilities (Lambda) ---
+  TestLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # Basic Lambda logging permissions
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        # Permission to create ENIs (Network Interfaces) inside the VPC
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
+  TestLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "${StackNamePrefix}-tester"
+      Runtime: python3.11
+      Handler: index.handler
+      Role: !GetAtt TestLambdaRole.Arn
+      Timeout: 30
+      MemorySize: 128
+      VpcConfig:
+        SubnetIds: !Ref SubnetIds
+        SecurityGroupIds: [!Ref ContainerSecurityGroup]
+      Environment:
+        Variables:
+          API_URL: !Sub "http://${LoadBalancer.DNSName}"
+      Code:
+        ZipFile: |
+          import urllib.request
+          import json
+          import os
+
+          def handler(event, context):
+              url = f"{os.environ['API_URL']}/text/transform"
+              
+              # 1. Handle default/empty events gracefully
+              # If the user clicks "Test" with the default AWS JSON (key1, key2) or empty,
+              # we swap it for a valid default payload so they see immediate success.
+              if "text" not in event:
+                  print("No 'text' field found in event. Using default demo payload.")
+                  payload = {
+                      "text": ["My name is John Doe and I live in Berlin."]
+                  }
+              else:
+                  # 2. Passthrough Mode
+                  # We take whatever the user provided and send it straight to the API.
+                  # This lets the API handle validation and allows testing of all features.
+                  payload = event
+
+              print(f"Sending payload to {url}")
+
+              # 3. Send Request
+              try:
+                  req = urllib.request.Request(
+                      url,
+                      data=json.dumps(payload).encode('utf-8'),
+                      headers={'Content-Type': 'application/json'}
+                  )
+                  
+                  with urllib.request.urlopen(req, timeout=10) as response:
+                      response_body = response.read()
+                      return json.loads(response_body)
+                      
+              except Exception as e:
+                  print(f"Request Failed: {str(e)}")
+                  return {
+                      "status": "FAILED", 
+                      "error": str(e),
+                      "hint": "Did you manually start the service first using manage_service.py?"
+                  }
+
+Outputs:
+  ClusterName:
+    Value: !Ref Cluster
+  ClusterArn:
+    Value: !GetAtt Cluster.Arn
+  TaskExecutionRoleArn:
+    Value: !GetAtt EcsTaskExecutionRole.Arn
+  TaskRoleArn:
+    Value: !GetAtt EcsTaskRole.Arn
+  TargetGroupArn:
+    Value: !Ref TargetGroup
+  ContainerSecurityGroup:
+    Value: !Ref ContainerSecurityGroup
+  LogGroup:
+    Value: !Ref LogGroup
+  ServiceUrl:
+    Value: !Sub "http://${LoadBalancer.DNSName}"
+  TestLambdaName:
+    Value: !Ref TestLambda
+    Description: "Lambda function to test internal API connectivity"

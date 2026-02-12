@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'PII Eraser: Fargate Service Stack'
+
+Parameters:
+  SubnetIds:
+    Type: CommaDelimitedList
+  ImageUri:
+    Type: String
+  ContainerCpu:
+    Type: Number
+  ContainerMemory:
+    Type: Number
+  MinContainers:
+    Type: Number
+  MaxContainers:
+    Type: Number
+  Base64Config:
+    Type: String
+  TargetCpuUtilization:
+    Type: Number
+  ComputeType:
+    Type: String
+  
+  # Imported Resources
+  ClusterName:
+    Type: String
+  ClusterArn:
+    Type: String
+  TargetGroupArn:
+    Type: String
+  ContainerSecurityGroup:
+    Type: String
+  TaskExecutionRoleArn:
+    Type: String
+  TaskRoleArn:
+    Type: String
+  LogGroup:
+    Type: String
+
+Conditions:
+  IsSpot: !Equals [!Ref ComputeType, "SPOT"]
+
+Resources:
+  # --- Task Definition ---
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${AWS::StackName}-task-fargate"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [FARGATE]
+      Cpu: !Ref ContainerCpu
+      Memory: !Ref ContainerMemory
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
+      ExecutionRoleArn: !Ref TaskExecutionRoleArn
+      TaskRoleArn: !Ref TaskRoleArn
+      
+      Volumes:
+        - Name: tmp-volume
+
+      ContainerDefinitions:
+        - Name: pii-eraser
+          Image: !Ref ImageUri
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8000
+          
+          # Security: Read-Only Root Filesystem & Drop Capabilities
+          ReadonlyRootFilesystem: true
+          LinuxParameters:
+            Capabilities:
+              Drop:
+                - ALL # Security: container has no root capabilities
+          
+          MountPoints:
+            - SourceVolume: tmp-volume
+              ContainerPath: /tmp
+          
+          Environment:
+            - Name: CONFIG_B64
+              Value: !Ref Base64Config
+            - Name: PYTHONUNBUFFERED
+              Value: "1"
+
+          HealthCheck:
+            Command: ["CMD-SHELL", "python /app/healthcheck.py || exit 1"]
+            Interval: 10
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 120
+          
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: fargate
+
+  # --- Service ---
+  Service:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: !Sub "${AWS::StackName}-service"
+      Cluster: !Ref ClusterArn
+      TaskDefinition: !Ref TaskDefinition
+      
+      EnableExecuteCommand: true
+
+      CapacityProviderStrategy:
+        - CapacityProvider: !If [IsSpot, "FARGATE_SPOT", "FARGATE"]
+          Weight: 1
+          Base: 0
+      
+      HealthCheckGracePeriodSeconds: 120
+
+      # Zero Downtime Strategy
+      DeploymentConfiguration:
+        MaximumPercent: 200         # Allow temporarily doubling tasks (e.g., 3 -> 6)
+        MinimumHealthyPercent: 100  # Do not kill old tasks until new ones are healthy
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: !Ref SubnetIds
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !Ref ContainerSecurityGroup
+      LoadBalancers:
+        - ContainerName: pii-eraser
+          ContainerPort: 8000
+          TargetGroupArn: !Ref TargetGroupArn
+
+  # --- Auto Scaling ---
+  AutoScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: !Ref MaxContainers
+      MinCapacity: !Ref MinContainers
+      ResourceId: !Join ["/", [service, !Ref ClusterName, !GetAtt Service.Name]]
+      RoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  CpuScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-cpu-scaling"
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref AutoScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: !Ref TargetCpuUtilization
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60

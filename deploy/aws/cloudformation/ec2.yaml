@@ -1,0 +1,283 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'PII Eraser: EC2 Service Stack'
+
+Parameters:
+  VpcId:
+    Type: String
+  SubnetIds:
+    Type: CommaDelimitedList
+  ImageUri:
+    Type: String
+  ContainerCpu:
+    Type: Number
+  ContainerMemory:
+    Type: Number
+  MinContainers:
+    Type: Number
+  MaxContainers:
+    Type: Number
+  Base64Config:
+    Type: String
+  TargetCpuUtilization:
+    Type: Number
+  ComputeType:
+    Type: String # SPOT or ON_DEMAND
+  InstanceType:
+    Type: String
+    Default: c8i.xlarge
+   
+  # Imported Resources
+  ClusterName:
+    Type: String
+  ClusterArn:
+    Type: String
+  TargetGroupArn:
+    Type: String
+  ContainerSecurityGroup:
+    Type: String
+  TaskExecutionRoleArn:
+    Type: String
+  TaskRoleArn:
+    Type: String
+  LogGroup:
+    Type: String
+
+  # SSM Parameter for Amazon Linux 2023 ECS Optimized AMI
+  LatestEcsAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id
+
+Conditions:
+  IsSpot: !Equals [!Ref ComputeType, "SPOT"]
+
+Resources:
+  # --- EC2 Infrastructure ---
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        MetadataOptions:
+        HttpTokens: required
+        HttpEndpoint: enabled
+        ImageId: !Ref LatestEcsAmiId
+        InstanceType: !Ref InstanceType
+        IamInstanceProfile:
+          Arn: !GetAtt Ec2InstanceProfile.Arn
+        SecurityGroupIds: 
+          - !Ref ContainerSecurityGroup
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            echo "ECS_CLUSTER=${ClusterName}" >> /etc/ecs/ecs.config
+            # Block containers from accessing Host IAM Role credentials
+            echo "ECS_AWSVPC_BLOCK_IMDS=true" >> /etc/ecs/ecs.config
+            # Optimization for high throughput networking
+            # 65535 is standard for enterprise high-load ingress
+            echo "net.core.somaxconn=65535" >> /etc/sysctl.conf
+            sysctl -p
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda
+            Ebs:
+              VolumeSize: 30
+              VolumeType: gp3
+              Encrypted: true
+              Iops: 3000
+              Throughput: 125
+              DeleteOnTermination: true
+
+  Ec2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref Ec2InstanceRole]
+
+  AutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier: !Ref SubnetIds
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref LaunchTemplate
+            Version: !GetAtt LaunchTemplate.LatestVersionNumber
+          Overrides:
+            - InstanceType: !Ref InstanceType
+        InstancesDistribution:
+          OnDemandBaseCapacity: !If [IsSpot, 0, 1]
+          OnDemandPercentageAboveBaseCapacity: !If [IsSpot, 0, 100]
+          SpotAllocationStrategy: price-capacity-optimized
+      MinSize: "0" 
+      MaxSize: !Ref MaxContainers 
+      Tags:
+        - Key: AmazonECSManaged
+          Value: true
+          PropagateAtLaunch: true
+    
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MinInstancesInService: 0
+        MaxBatchSize: 1
+        # ECS handles health checks, so the ASG doesn't need to wait excessively.
+        PauseTime: PT2M
+
+  CapacityProvider:
+    Type: AWS::ECS::CapacityProvider
+    Properties:
+      AutoScalingGroupProvider:
+        AutoScalingGroupArn: !Ref AutoScalingGroup
+        ManagedScaling:
+          Status: ENABLED
+          TargetCapacity: 100 
+          MinimumScalingStepSize: 1
+          MaximumScalingStepSize: 10
+        ManagedTerminationProtection: DISABLED
+
+  ClusterAssociation:
+    Type: AWS::ECS::ClusterCapacityProviderAssociations
+    Properties:
+      Cluster: !Ref ClusterName
+      CapacityProviders: [!Ref CapacityProvider]
+      DefaultCapacityProviderStrategy:
+        - CapacityProvider: !Ref CapacityProvider
+          Weight: 1
+
+  # --- Task & Service ---
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${AWS::StackName}-task-ec2"
+      NetworkMode: awsvpc
+      RequiresCompatibilities: [EC2]
+      Cpu: !Ref ContainerCpu
+      Memory: !Ref ContainerMemory
+      RuntimePlatform:
+        CpuArchitecture: X86_64
+        OperatingSystemFamily: LINUX
+      ExecutionRoleArn: !Ref TaskExecutionRoleArn
+      TaskRoleArn: !Ref TaskRoleArn
+      
+      Volumes:
+        - Name: tmp-volume
+
+      ContainerDefinitions:
+        - Name: pii-eraser
+          Image: !Ref ImageUri
+          Essential: true
+          PortMappings:
+            - ContainerPort: 8000
+          
+          # Prevent malware persistence by making the root FS read-only
+          ReadonlyRootFilesystem: true
+          
+          # Drop all Linux capabilities (root powers) to minimize breakout risk
+          LinuxParameters:
+            Capabilities:
+              Drop:
+                - ALL
+
+          # Constraints for high performance networking
+          Ulimits:
+            - Name: nofile
+              SoftLimit: 65535
+              HardLimit: 65535
+
+          MountPoints:
+            - SourceVolume: tmp-volume
+              ContainerPath: /tmp
+          
+          Environment:
+            - Name: CONFIG_B64
+              Value: !Ref Base64Config
+            - Name: PYTHONUNBUFFERED
+              Value: "1"
+
+          HealthCheck:
+            Command: ["CMD-SHELL", "python /app/healthcheck.py || exit 1"]
+            Interval: 10
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 120
+          
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref LogGroup
+              awslogs-region: !Ref "AWS::Region"
+              awslogs-stream-prefix: ec2
+
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: ClusterAssociation
+    Properties:
+      ServiceName: !Sub "${AWS::StackName}-service"
+      Cluster: !Ref ClusterArn
+      TaskDefinition: !Ref TaskDefinition
+      
+      CapacityProviderStrategy:
+        - CapacityProvider: !Ref CapacityProvider
+          Weight: 1
+      
+      # 1. High Availability: Spread tasks across Availability Zones
+      # 2. Strict Isolation: Ensure strictly 1 Container per EC2 Instance. This drastically hurts throughput otherwise
+      PlacementConstraints:
+        - Type: distinctInstance
+
+      PlacementStrategies:
+        - Type: spread
+          Field: attribute:ecs.availability-zone
+      
+      # Zero Downtime Configuration
+      DeploymentConfiguration:
+        MaximumPercent: 200        # Allows bringing up new instances before killing old ones
+        MinimumHealthyPercent: 100 # Ensures old containers keep serving until new ones are ready
+        DeploymentCircuitBreaker:
+          Enable: true
+          Rollback: true
+
+      HealthCheckGracePeriodSeconds: 120
+
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          Subnets: !Ref SubnetIds
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !Ref ContainerSecurityGroup
+      LoadBalancers:
+        - ContainerName: pii-eraser
+          ContainerPort: 8000
+          TargetGroupArn: !Ref TargetGroupArn
+
+  AutoScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: !Ref MaxContainers
+      MinCapacity: !Ref MinContainers
+      ResourceId: !Join ["/", [service, !Ref ClusterName, !GetAtt Service.Name]]
+      RoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  CpuScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-cpu-scaling"
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref AutoScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        TargetValue: !Ref TargetCpuUtilization
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60

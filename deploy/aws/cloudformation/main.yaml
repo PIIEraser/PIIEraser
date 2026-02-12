@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'PII Eraser: One-Click Enterprise Deployment (Master Stack)'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: pii-eraser-prod
+    Description: Prefix for resource names.
+
+  # --- Network Strategy ---
+  CreateNewVpc:
+    Type: String
+    Description: "Create a new secure VPC? Select 'false' to deploy into an existing VPC."
+    Default: "true"
+    AllowedValues: ["true", "false"]
+
+  ExistingVpcId:
+    Type: String
+    Description: "If CreateNewVpc is false, enter your existing VPC ID here."
+    Default: ""
+
+  ExistingSubnetIds:
+    Type: CommaDelimitedList
+    Description: "If CreateNewVpc is false, select at least 2 PRIVATE subnets."
+    Default: ""
+
+  # --- App Config ---
+  ImageUri:
+    Type: String
+    Description: "The container image URI."
+    MinLength: 5  # Enforces that the field cannot be empty
+    ConstraintDescription: "You must provide a valid Container Image URI."
+  
+  DeploymentPlatform:
+    Type: String
+    Default: "FARGATE"
+    AllowedValues: ["FARGATE", "EC2"]
+    Description: "Compute platform. EC2 recommended for AVX512 VNNI/AMX performance."
+
+  Base64Config:
+    Type: String
+    Description: "Base64 encoded content of config.yaml."
+    Default: ""
+
+  ComputeType:
+    Type: String
+    Default: "ON_DEMAND"
+    AllowedValues: ["SPOT", "ON_DEMAND"]
+    Description: "Compute strategy. SPOT saves costs."
+
+  Ec2InstanceType:
+    Type: String
+    Default: "c8i.xlarge"
+    Description: "(EC2 Only) Instance type. c7i/c8i recommended for AMX. Make sure that ContainerCpu and ContainerMemory are set to match."
+
+  ContainerCpu:
+    Type: Number
+    Default: 4096
+    Description: "CPU Units (1024 = 1 vCPU). For EC2, ensure this matches the vCPU count of your chosen Instance Type to maximize performance. Please see the docs for optimal values."
+
+  ContainerMemory:
+    Type: Number
+    Default: 8192
+    Description: "Container RAM amount. For EC2, please ensure this is slightly less than the host amount, e.g. 7168 for an 8GB VM. Please see the docs for optimal values."
+
+  MinContainers:
+    Type: Number
+    Default: 0
+
+  MaxContainers:
+    Type: Number
+    Default: 1
+
+  RequestTimeout:
+    Type: Number
+    Default: 600
+    Description: "Global timeout in seconds for requests (ALB)."
+
+Conditions:
+  ShouldCreateVpc: !Equals [!Ref CreateNewVpc, "true"]
+  IsFargate: !Equals [!Ref DeploymentPlatform, "FARGATE"]
+  IsEC2: !Equals [!Ref DeploymentPlatform, "EC2"]
+
+Resources:
+  # 1. (Optional) VPC Stack
+  VpcStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: ShouldCreateVpc
+    Properties:
+      TemplateURL: ./vpc.yaml
+      Parameters:
+        EnvironmentName: !Sub "${EnvironmentName}-net"
+
+  # 2. Common Infrastructure Stack (Shared by both)
+  CommonStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./common.yaml
+      Parameters:
+        StackNamePrefix: !Ref EnvironmentName
+        VpcId: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
+        SubnetIds: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.PrivateSubnetIds, !Join [",", !Ref ExistingSubnetIds]]
+        RequestTimeout: !Ref RequestTimeout
+
+  # 3a. Fargate Service Stack
+  FargateStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: IsFargate
+    Properties:
+      TemplateURL: ./fargate.yaml
+      Parameters:
+        SubnetIds: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.PrivateSubnetIds, !Join [",", !Ref ExistingSubnetIds]]
+        ImageUri: !Ref ImageUri
+        ContainerCpu: !Ref ContainerCpu
+        ContainerMemory: !Ref ContainerMemory
+        MinContainers: !Ref MinContainers
+        MaxContainers: !Ref MaxContainers
+        Base64Config: !Ref Base64Config
+        ComputeType: !Ref ComputeType
+        TargetCpuUtilization: 70
+        # Injected Resources from CommonStack
+        ClusterName: !GetAtt CommonStack.Outputs.ClusterName
+        ClusterArn: !GetAtt CommonStack.Outputs.ClusterArn
+        TargetGroupArn: !GetAtt CommonStack.Outputs.TargetGroupArn
+        ContainerSecurityGroup: !GetAtt CommonStack.Outputs.ContainerSecurityGroup
+        TaskExecutionRoleArn: !GetAtt CommonStack.Outputs.TaskExecutionRoleArn
+        TaskRoleArn: !GetAtt CommonStack.Outputs.TaskRoleArn
+        LogGroup: !GetAtt CommonStack.Outputs.LogGroup
+
+  # 3b. EC2 Service Stack
+  Ec2Stack:
+    Type: AWS::CloudFormation::Stack
+    Condition: IsEC2
+    Properties:
+      TemplateURL: ./ec2.yaml
+      Parameters:
+        VpcId: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
+        SubnetIds: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.PrivateSubnetIds, !Join [",", !Ref ExistingSubnetIds]]
+        ImageUri: !Ref ImageUri
+        ContainerCpu: !Ref ContainerCpu
+        ContainerMemory: !Ref ContainerMemory
+        MinContainers: !Ref MinContainers
+        MaxContainers: !Ref MaxContainers
+        Base64Config: !Ref Base64Config
+        ComputeType: !Ref ComputeType
+        InstanceType: !Ref Ec2InstanceType
+        TargetCpuUtilization: 70
+        # Injected Resources from CommonStack
+        ClusterName: !GetAtt CommonStack.Outputs.ClusterName
+        ClusterArn: !GetAtt CommonStack.Outputs.ClusterArn
+        TargetGroupArn: !GetAtt CommonStack.Outputs.TargetGroupArn
+        ContainerSecurityGroup: !GetAtt CommonStack.Outputs.ContainerSecurityGroup
+        TaskExecutionRoleArn: !GetAtt CommonStack.Outputs.TaskExecutionRoleArn
+        TaskRoleArn: !GetAtt CommonStack.Outputs.TaskRoleArn
+        LogGroup: !GetAtt CommonStack.Outputs.LogGroup
+
+Outputs:
+  ServiceEndpoint:
+    Description: "The internal URL of PII Eraser"
+    Value: !GetAtt CommonStack.Outputs.ServiceUrl
+  VpcId:
+    Description: "The VPC ID where resources were deployed"
+    Value: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
+
+  ContainerSecurityGroup:
+    Description: "The Security Group used by the containers"
+    Value: !GetAtt CommonStack.Outputs.ContainerSecurityGroup
