@@ -36,14 +36,6 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSMarketplaceMeteringRegisterUsage
-      Policies:
-        - PolicyName: PIIEraserLogging
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action: [logs:CreateLogStream, logs:PutLogEvents]
-                Resource: !GetAtt LogGroup.Arn
 
   # --- Logs ---
   LogGroup:
@@ -67,13 +59,28 @@ Resources:
   ContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow traffic from ALB to Container
+      GroupDescription: Allow traffic from ALB to Container and restrict outbound
       VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 8000
           ToPort: 8000
           SourceSecurityGroupId: !Ref AlbSecurityGroup
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: "Allow outbound HTTPS strictly for AWS Services (Marketplace Metering, ECR, Logs)"
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow outbound traffic for Test Lambda
+      VpcId: !Ref VpcId
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
 
   # --- Load Balancer (Internal) ---
   LoadBalancer:
@@ -152,7 +159,7 @@ Resources:
       MemorySize: 128
       VpcConfig:
         SubnetIds: !Ref SubnetIds
-        SecurityGroupIds: [!Ref ContainerSecurityGroup]
+        SecurityGroupIds: [!Ref LambdaSecurityGroup]
       Environment:
         Variables:
           API_URL: !Sub "http://${LoadBalancer.DNSName}"
