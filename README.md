@@ -86,4 +86,4 @@ The PII Eraser container image itself is proprietary software licensed via the A
 
 ## Support
 
-For support, feature requests, or custom entity training, please [email us](mailto:support@piieraser.ai)
+For support, feature requests, or custom entity training, please [email us](mailto:support@piieraser.ai) at **support@piieraser.ai**.
