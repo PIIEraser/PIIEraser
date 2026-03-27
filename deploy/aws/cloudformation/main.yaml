@@ -60,7 +60,7 @@ Parameters:
 
   ContainerMemory:
     Type: Number
-    Default: 8192
+    Default: 7168
     Description: "Container RAM amount. For EC2, please ensure this is slightly less than the host amount, e.g. 7168 for an 8GB VM. Please see the docs for optimal values."
 
   MinContainers:
@@ -165,3 +165,7 @@ Outputs:
   ContainerSecurityGroup:
     Description: "The Security Group used by the containers"
     Value: !GetAtt CommonStack.Outputs.ContainerSecurityGroup
+
+  TestLambdaSecurityGroup:
+    Description: "Security Group for testing tools"
+    Value: !GetAtt CommonStack.Outputs.TestLambdaSecurityGroup
