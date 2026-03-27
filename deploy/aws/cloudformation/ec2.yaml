@@ -57,8 +57,8 @@ Resources:
     Properties:
       LaunchTemplateData:
         MetadataOptions:
-        HttpTokens: required
-        HttpEndpoint: enabled
+          HttpTokens: required
+          HttpEndpoint: enabled
         ImageId: !Ref LatestEcsAmiId
         InstanceType: !Ref InstanceType
         IamInstanceProfile:
@@ -153,7 +153,7 @@ Resources:
         - CapacityProvider: !Ref CapacityProvider
           Weight: 1
 
-  # --- Task & Service ---
+  # --- Task Definition ---
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -204,7 +204,7 @@ Resources:
               Value: "1"
 
           HealthCheck:
-            Command: ["CMD-SHELL", "python /app/healthcheck.py || exit 1"]
+            Command: ["CMD", "/venv/bin/python", "/app/healthcheck.py"]
             Interval: 10
             Timeout: 5
             Retries: 3
@@ -217,6 +217,7 @@ Resources:
               awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: ec2
 
+  # --- Service ---
   Service:
     Type: AWS::ECS::Service
     DependsOn: ClusterAssociation
@@ -225,29 +226,22 @@ Resources:
       Cluster: !Ref ClusterArn
       TaskDefinition: !Ref TaskDefinition
       
+      EnableExecuteCommand: false
+
       CapacityProviderStrategy:
         - CapacityProvider: !Ref CapacityProvider
           Weight: 1
       
-      # 1. High Availability: Spread tasks across Availability Zones
-      # 2. Strict Isolation: Ensure strictly 1 Container per EC2 Instance. This drastically hurts throughput otherwise
-      PlacementConstraints:
-        - Type: distinctInstance
+      HealthCheckGracePeriodSeconds: 120
 
-      PlacementStrategies:
-        - Type: spread
-          Field: attribute:ecs.availability-zone
-      
       # Zero Downtime Configuration
       DeploymentConfiguration:
-        MaximumPercent: 200        # Allows bringing up new instances before killing old ones
-        MinimumHealthyPercent: 100 # Ensures old containers keep serving until new ones are ready
+        MaximumPercent: 200         # Allow temporarily doubling tasks (e.g., 3 -> 6)
+        MinimumHealthyPercent: 100  # Do not kill old tasks until new ones are healthy
         DeploymentCircuitBreaker:
           Enable: true
           Rollback: true
-
-      HealthCheckGracePeriodSeconds: 120
-
+      
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets: !Ref SubnetIds
@@ -259,6 +253,16 @@ Resources:
           ContainerPort: 8000
           TargetGroupArn: !Ref TargetGroupArn
 
+      # 1. High Availability: Spread tasks across Availability Zones
+      # 2. Strict Isolation: Ensure strictly 1 Container per EC2 Instance. This drastically hurts throughput otherwise
+      PlacementConstraints:
+        - Type: distinctInstance
+
+      PlacementStrategies:
+        - Type: spread
+          Field: attribute:ecs.availability-zone
+      
+  # --- Auto Scaling ---
   AutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:

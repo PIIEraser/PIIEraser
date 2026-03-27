@@ -84,7 +84,7 @@ Resources:
               Value: "1"
 
           HealthCheck:
-            Command: ["CMD-SHELL", "python /app/healthcheck.py || exit 1"]
+            Command: ["CMD", "/venv/bin/python", "/app/healthcheck.py"]
             Interval: 10
             Timeout: 5
             Retries: 3
@@ -105,7 +105,7 @@ Resources:
       Cluster: !Ref ClusterArn
       TaskDefinition: !Ref TaskDefinition
       
-      EnableExecuteCommand: true
+      EnableExecuteCommand: false
 
       CapacityProviderStrategy:
         - CapacityProvider: !If [IsSpot, "FARGATE_SPOT", "FARGATE"]

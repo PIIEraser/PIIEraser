@@ -153,7 +153,7 @@ if [ "$DEPLOY_MODE" == "2" ]; then
     echo "Creating Change Set (Dry Run)..."
     DEPLOY_ARGS="--no-execute-changeset"
 else
-    echo "Deploying Stack... (This may take 5-10 minutes)"
+    echo "Deploying Stack... (This will take some minutes)"
 fi
 
 aws cloudformation deploy \
@@ -162,6 +162,7 @@ aws cloudformation deploy \
   --parameter-overrides $PARAMS \
   --region $REGION \
   --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+  --disable-rollback \
   $DEPLOY_ARGS
 
 # 8. Output Results
