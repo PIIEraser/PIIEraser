@@ -17,9 +17,7 @@ We provide security updates for the current major version of the PII Eraser cont
 
 If you discover a potential security vulnerability in the PII Eraser container, or the deployment templates within this repository, **please do not open a public GitHub issue.**
 
-Instead, please report it to us privately via email:
-
-**Email:** security@piieraser.ai
+Instead, please report it to us privately via email at **security@piieraser.ai**.
 
 ### What to include in your report:
 To help us triage and resolve the issue quickly, please include the following:
