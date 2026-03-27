@@ -1,6 +1,4 @@
 <div align="center">
-  <img src="https://via.placeholder.com/400x120/FFFFFF/000000?text=PII+Eraser+Logo" alt="PII Eraser Logo" width="400"/>
-
   <p><b>Enterprise-grade PII detection and anonymization for modern data workflows.</b></p>
 
   <img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square">
