@@ -1,7 +1,6 @@
 <div align="center">
   <p><b>Enterprise-grade PII detection and anonymization for modern data workflows.</b></p>
 
-  <img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square">
 </div>
 
 ---
