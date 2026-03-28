@@ -69,7 +69,7 @@ Parameters:
 
   MaxContainers:
     Type: Number
-    Default: 1
+    Default: 10
 
   RequestTimeout:
     Type: Number
