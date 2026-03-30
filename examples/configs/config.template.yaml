@@ -1,0 +1,77 @@
+# ==============================================================================
+# PII Eraser Configuration Template
+# ==============================================================================
+# This configuration template shows all possible configuration options
+# together with realistic values. To customize your deployment,
+# uncomment the relevant lines and modify their values.
+# If left commented, the API defaults are used.
+# ==============================================================================
+
+# Entity types to detect, can be either built-in entity types or new custom types
+# specified in the block list. If not provided, all built-in entity types will be
+# detected. If custom block list entity types have been specified, they must be
+# added here.
+# entity_types:
+# - NAME
+# - AGE
+# - ADDRESS
+# - EMAIL
+
+# Minimum entity score value. By default PII Eraser automatically thresholds
+# entity confidences. If set, any detected entities with scores less than this
+# value are discarded after automatic thresholding.
+# score_threshold: 0.85
+
+# Logging level. Valid choices are: (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+# log_level: INFO
+
+# Action to be performed on each detected entity in the text. Valid options are:
+# ['redact', 'redact_constant', 'hash', 'mask']
+# operator: redact
+
+# Configuration for 'redact_constant' operator.
+# redact_constant_config:
+#   replace_value: <REDACTED>
+
+# Configuration for 'hash' operator.
+# hash_config:
+#   hash_type: sha256
+
+# Configuration for 'mask' operator.
+# mask_config:
+#   mask_char: '#'
+#   chars_to_mask: -1
+#   from_end: false
+
+# List of terms that are not considered PII entities. Any PII detections that
+# match these terms exactly (case-insensitive) will be discarded. Also known as a
+# pass list or white list
+# allow_list:
+# - Amazon
+# - Python
+# - Gemini
+
+# Dictionary of terms that are always considered PII entities, grouped by entity
+# type. Any text matching these terms exactly (case-insensitive) will be detected
+# as the specified entity type. Also known as a deny list or black list.
+# block_list:
+#   PROJECT_CODENAME:
+#   - Project Apollo
+#   - Operation Titan
+#   COMPETITOR:
+#   - Acme Corp
+
+# The maximum number of tokens in a single text input the system will attempt to
+# process. Texts with more tokens than this value will return an error. When
+# increasing this value, please monitor RAM usage and processing time.
+# max_tokens: 1000000
+
+# Disable the startup memory check. Please note that this is not recommended.
+# disable_startup_memory_check: false
+
+# Enable the Presidio Analyzer compatibility aliases to allow for drop-in
+# replacement of Presidio Analyzer: /compatibility/presidio/analyze -> /analyze
+# /compatibility/presidio/recognizers -> /recognizers
+# /compatibility/presidio/supportedentities -> /supportedentities
+# enable_presidio_aliases: false
+
