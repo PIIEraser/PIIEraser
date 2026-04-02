@@ -1,0 +1,44 @@
+# ==============================================================================
+# PII Eraser config.yaml Example: 
+# UK M&A Deal Room Due Diligence
+# ==============================================================================
+# Context: Financial firm analyzing highly confidential deal rooms.
+# Goal: Sanitize documents to prevent insider trading leaks, protect the 
+# identities of involved companies/personnel and reduce risk when using 
+# cloud LLM services such as OpenAI.
+# ==============================================================================
+
+# Redaction replaces the text with semantic tags (e.g., <ORGANIZATION>), 
+# which maintains document readability for analysts reviewing the contracts.
+operator: redact
+
+# Enabled entity types.
+entity_types:
+  - ORGANIZATION
+  - ORGANIZATION_ID   # Catches UK Company House Numbers
+  - NAME
+  - TAX_ID
+  - GOV_SERVICES_ID   # Catches National Insurance Numbers (NINO)
+  - BANK_ID           # catches UK Sort codes
+  - BANK_ACCOUNT
+  - EMAIL
+  - PHONE
+  - PROJECT_CODENAME  # Custom entity defined below
+
+# Block List (Deny list).
+block_list:
+  # Overloading ORGANIZATION ensures that the firm's name and names of it's most sensitive clients are protected. 
+  ORGANIZATION:
+    - Acme Corp
+    - Acme Corporation
+    - Globex
+    - Globex Inc
+    - Initech
+    - Stark Industries
+  # Create a custom entity type called PROJECT_CODENAME to hide internal deal names.
+  PROJECT_CODENAME:
+    - Project Apollo
+    - Apollo
+    - Operation Titan
+    - Project Titan
+    - Titan
