@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <clipPath id="eraser-clip">
+      <path d="M 12 0 A 12 12 0 0 0 0 12 L 0 248 A 12 12 0 0 0 12 260 L 40 260 L 120 213.81197846482993 L 120 12 A 12 12 0 0 0 108 0 Z" />
+    </clipPath>
+    
+    <clipPath id="shadow-ground-clip">
+      <path d="M -2000 -2000 
+               L 2000 -2000 
+               L 560.94 -40.76 
+               L -305.09 459.24 Z" />
+    </clipPath>
+    
+    <filter id="clean-blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20" />
+    </filter>
+  </defs>
+
+  <g transform="translate(300, 335) scale(2) rotate(30) translate(-60.0, -130.0)">
+    
+      <g transform="translate(20, 0)" clip-path="url(#shadow-ground-clip)" filter="url(#clean-blur)" opacity="0.4">
+        <path d="M 12 0 A 12 12 0 0 0 0 12 L 0 248 A 12 12 0 0 0 12 260 L 40 260 L 120 213.81197846482993 L 120 12 A 12 12 0 0 0 108 0 Z" fill="#1e293b" stroke="#1e293b" stroke-width="20" stroke-linejoin="round" />
+      </g>
+    <path d="M 44.43 268.99 L 127.93 209.24 L 127.93 209.24 L 221.42 166.80 Z" fill="#0f766e" />
+    <path d="M 12 0 A 12 12 0 0 0 0 12 L 0 248 A 12 12 0 0 0 12 260 L 40 260 L 120 213.81197846482993 L 120 12 A 12 12 0 0 0 108 0 Z" fill="#0f766e" stroke="#0f766e" stroke-width="20" stroke-linejoin="round" />
+    <g clip-path="url(#eraser-clip)">
+        <rect x="-120" y="160" width="360" height="100" fill="#ffffff" />
+    </g>
+    <rect x="-10.0" y="160" width="140" height="30" fill="#0f766e" />
+    <rect x="-10.0" y="110" width="140" height="50" fill="#0f172a" />
+  </g>
+</svg>
