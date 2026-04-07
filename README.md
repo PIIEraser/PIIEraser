@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/logo.png" alt="PII Eraser Logo" width="200">
+  <img src="assets/logo.svg" alt="PII Eraser Logo" width="200">
   <h1>PII Eraser</h1>
   <p><b>Enterprise-grade PII detection and anonymization for modern data workflows.</b></p>
 
