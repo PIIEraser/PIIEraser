@@ -13,7 +13,7 @@ PII Eraser is a high-performance, self-hosted container providing a REST API for
 
 Designed specifically for compliance-heavy environments (Finance, Healthcare, Legal), PII Eraser processes raw text strings and OpenAI-format chats entirely within your own infrastructure, ensuring sensitive data never leaves your environment.
 
-> **Note:** This repository contains the official deployment templates (AWS CloudFormation, Docker Compose) and integration examples for PII Eraser. The core container image is commercially licensed and available via the AWS Container Marketplace or directly from PII Eraser.
+> **Note:** This repository contains the official deployment templates (AWS CloudFormation, Docker Compose) and integration examples for PII Eraser. The core container image is commercially licensed.
 
 ## Key Capabilities
 
