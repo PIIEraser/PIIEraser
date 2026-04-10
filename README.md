@@ -1,7 +1,8 @@
 <div align="center">
+  <h1>
+    PII Eraser
+  </h1>
   <p><b>Enterprise-grade PII detection and anonymization for modern data workflows.</b></p>
-
-  <img alt="License" src="https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square">
 </div>
 
 ---
@@ -12,7 +13,7 @@ PII Eraser is a high-performance, self-hosted container providing a REST API for
 
 Designed specifically for compliance-heavy environments (Finance, Healthcare, Legal), PII Eraser processes raw text strings and OpenAI-format chats entirely within your own infrastructure, ensuring sensitive data never leaves your environment.
 
-> **Note:** This repository contains the official deployment templates (AWS CloudFormation, Docker Compose) and integration examples for PII Eraser. The core container image is commercially licensed and available via the AWS Container Marketplace or directly from PII Eraser.
+> **Note:** This repository contains the official deployment templates (AWS CloudFormation, Docker Compose) and integration examples for PII Eraser. The core container image is commercially licensed.
 
 ## Key Capabilities
 
@@ -80,7 +81,7 @@ If you discover a security vulnerability in the deployment templates or the cont
 
 The code and deployment templates in this repository are licensed under the Apache 2.0 License.
 
-The PII Eraser container image itself is proprietary software licensed via the AWS and Azure Marketplaces or via contract. Usage of the container is subject to the terms of service provided at the time of subscription.
+The PII Eraser container image itself is proprietary software licensed via cloud marketplaces or via contract. Usage of the container is subject to the terms of service provided at the time of subscription.
 
 ## Support
 

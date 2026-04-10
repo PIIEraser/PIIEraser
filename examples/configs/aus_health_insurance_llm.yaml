@@ -1,0 +1,30 @@
+# ==============================================================================
+# PII Eraser config.yaml Example: 
+# Australian Health Insurance LLM Pipeline
+# ==============================================================================
+# Context: A data science team is preparing historical claims and 
+# customer feedback to use a cloud-based LLM service like OpenAI.
+# Goal: Remove strict healthcare and personal identifiers before data leaves
+# the VPC, while replacing them with semantic tags to keep the medical 
+# narrative and data structure intact.
+# ==============================================================================
+
+# Use the redact operator to replace PII with tags like <HEALTHCARE_ID>. 
+# This gives the LLM the context it needs to understand the relationships 
+# in the text without exposing sensitive data.
+operator: redact
+
+# Enabled entity types
+entity_types:
+  - NAME
+  - HEALTHCARE_ID      # Catches Australian Medicare Numbers
+  - AGE
+  - DOB
+  - GOV_SERVICES_ID
+  - TAX_ID             # Catches Australian Tax File Numbers (TFN)
+  - BANK_ID            # Catches Bank-State-Branch (BSB) numbers
+  - BANK_ACCOUNT
+  - ADDRESS
+  - PHONE
+  - EMAIL
+

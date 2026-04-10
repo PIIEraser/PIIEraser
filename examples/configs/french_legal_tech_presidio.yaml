@@ -1,0 +1,46 @@
+# ==============================================================================
+# PII Eraser config.yaml Example: 
+# French Legal Tech (Presidio Migration)
+# ==============================================================================
+# Context: A legal tech startup building a document review platform for French 
+# law firms, transitioning away from Microsoft Presidio.
+# Goal: Act as a drop-in replacement for Presidio to redact sensitive personal 
+# data and company names from court filings and contracts, 
+# without requiring changes to their existing API integrations.
+# ==============================================================================
+
+# Targeted entity types relevant to French legal documents.
+entity_types:
+  - NAME
+  - ADDRESS
+  - AGE
+  - DOB
+  - ORGANIZATION
+  - ORGANIZATION_ID  # Catches SIREN business numbers.
+  - GOV_SERVICES_ID  # Includes the Numéro d'Inscription au Répertoire (NIR) / numéro de sécurité sociale
+  - TAX_ID           # Catches the Numéro SPI (numéro fiscal)
+  - NATIONAL_ID
+  - PHONE
+  - EMAIL
+
+# Allow through legal and public institutions to allow for automated document type classification
+allow_list:
+  # Allow through legal institutions like courthouses
+  - "Cour de Cassation"
+  - "Conseil d'État"
+  - "Tribunal Judiciaire"
+  - "Cour d'Appel de Paris"
+  - "Conseil de Prud'hommes"
+  - "Tribunal de Commerce"
+
+  # Regulatory & Public Bodies
+  - "CNIL"
+  - "AMF"
+  - "République Française"
+  - "Ministère de la Justice"
+  - "URSSAF"
+
+# Enable the Presidio Analyzer compatibility aliases.
+# This allows drop-in replacement of Presidio Analyzer by routing calls like /analyze  
+#  to PII Eraser's /compatibility/presidio/analyze endpoint.
+enable_presidio_aliases: true

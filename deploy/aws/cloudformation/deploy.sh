@@ -162,7 +162,6 @@ aws cloudformation deploy \
   --parameter-overrides $PARAMS \
   --region $REGION \
   --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-  --disable-rollback \
   $DEPLOY_ARGS
 
 # 8. Output Results
