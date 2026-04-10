@@ -1,6 +1,6 @@
 # PII Eraser Examples
 
-Welcome to the PII Eraser examples directory. This repository contains practical, real-world examples to help you integrate and configure PII Eraser for your specific data privacy, compliance, and security needs.
+This folder contains practical, real-world examples to help you integrate and configure PII Eraser for your specific data privacy, compliance, and security needs.
 
 PII Eraser is built to handle complex, multi-regional compliance requirements out of the box, with deep support for [European and global data types](https://docs.piieraser.ai/user_guide/entity_types). The examples provided here demonstrate how to tailor the engine for various industries, languages, and technical architectures.
 
