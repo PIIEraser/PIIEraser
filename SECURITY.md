@@ -7,7 +7,7 @@ PII Eraser is designed for high-compliance environments (Finance, Healthcare, Le
 
 To minimize our attack surface, the PII Eraser container is built on [Chainguard](https://www.chainguard.dev/) base images, ensuring a minimal footprint with zero known CVEs at the time of build. 
 
-*Note: This repository primarily contains deployment templates (e.g., AWS CloudFormation) and usage examples. The core PII Eraser container is distributed securely via the AWS and Azure Container Marketplaces and PII Eraser's container repository.*
+*Note: This repository primarily contains deployment templates (e.g., AWS CloudFormation) and usage examples. The core PII Eraser container is distributed securely via cloud marketplaces and PII Eraser's container repository.*
 
 ## Supported Versions
 
@@ -26,7 +26,7 @@ To help us triage and resolve the issue quickly, please include the following:
 * Detailed steps to reproduce the vulnerability (a proof of concept is highly appreciated).
 * Any relevant system information (e.g., AWS instance type, OS, environment).
 
-### Our Response Committment
+### Our Response Commitment
 As a provider of privacy-critical software, we commit to the following process:
 1.  **Acknowledge:** We will acknowledge receipt of your vulnerability report within 48 hours.
 2.  **Triage:** We will investigate and confirm the vulnerability, providing you with an estimated timeline for a patch.

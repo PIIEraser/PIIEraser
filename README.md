@@ -81,7 +81,7 @@ If you discover a security vulnerability in the deployment templates or the cont
 
 The code and deployment templates in this repository are licensed under the Apache 2.0 License.
 
-The PII Eraser container image itself is proprietary software licensed via the AWS and Azure Marketplaces or via contract. Usage of the container is subject to the terms of service provided at the time of subscription.
+The PII Eraser container image itself is proprietary software licensed via cloud marketplaces or via contract. Usage of the container is subject to the terms of service provided at the time of subscription.
 
 ## Support
 

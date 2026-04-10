@@ -9,7 +9,7 @@ This directory contains Python scripts and code snippets demonstrating how to in
 | `simple_example.py` | Minimal getting-started example. Send a single request and print the result. |
 | `api_best_practices.py` | High-volume best practices: batching, persistent connections, and concurrency. |
 | `streaming_pipeline.py` | Memory-efficient generator pipeline for arbitrarily large datasets (JSONL, database cursors, queues, etc.). |
-| `openai_chat_pii_firewall.py` | Remove PII and other sensitive entities from an OpenAI-format conversation via the `/chat/transform` endpoint and forward it to the OpenAI API. |
+| `openai_chat_pii_firewall.py` | Remove PII and other sensitive entities from an OpenAI-format conversation via the `/chat/transform` endpoint and forward it to an OpenAI-compatible LLM provider (OpenRouter in this example). |
 
 ### `simple_example.py`
 
