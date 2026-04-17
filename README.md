@@ -3,6 +3,12 @@
     PII Eraser
   </h1>
   <p><b>Enterprise-grade PII detection and anonymization for modern data workflows.</b></p>
+
+  <p>
+    <a href="https://docs.piieraser.ai"><strong>📖 Documentation</strong></a> |
+    <a href="https://docs.piieraser.ai/api/"><strong>⚡ API Reference</strong></a> |
+    <a href="https://piieraser.ai/get-started"><strong>📧 Get Started</strong></a>
+  </p>
 </div>
 
 ---
@@ -11,29 +17,29 @@
 
 PII Eraser is a high-performance, self-hosted container providing a REST API for the detection, redaction, and masking of Personally Identifiable Information (PII) and confidential entities. 
 
-Designed specifically for compliance-heavy environments (Finance, Healthcare, Legal), PII Eraser processes raw text strings and OpenAI-format chats entirely within your own infrastructure, ensuring sensitive data never leaves your environment.
+Designed specifically for compliance-heavy environments including [Financial Services](https://piieraser.ai/solutions/finance), [Insurance](https://piieraser.ai/solutions/insurance) and [Legal](https://piieraser.ai/solutions/legal), PII Eraser processes [text strings](https://docs.piieraser.ai/user_guide/text/) and [OpenAI-format chats](https://docs.piieraser.ai/user_guide/chats/) entirely within your own infrastructure, ensuring sensitive data never leaves your environment.
 
-> **Note:** This repository contains the official deployment templates (AWS CloudFormation, Docker Compose) and integration examples for PII Eraser. The core container image is commercially licensed.
+> **Note:** This repository contains the official deployment templates and integration examples for PII Eraser. The core container image is commercially licensed.
 
 ## Key Capabilities
 
-* **Global & Europe-First Localization:** Built with native, deep support for European languages and data formats (DACH, FR, IT, Benelux) alongside comprehensive US/CA/AU/UK coverage. See the [full list in the docs](https://docs.piieraser.ai/entity_types/).
-* **Industry Leading Accuracy:** PII Eraser uses the latest transformer technology to detect sensitive entities. This delivers higher accuracy than legacy regex or ML-based detectors, particularly on real world data that doesn't fit rigid formats or contain PII type descriptors (e.g. "My credit card number is ..").
-* **Drop-In Presidio Replacement:** Fully compatible with Microsoft Presidio Analyzer workflows, allowing you to upgrade your detection accuracy and performance without rewriting your application logic.
-* **LLM & GenAI Ready:** Native support for detecting and anonymizing PII in OpenAI-format chats before they are sent to external LLM providers.
-* **Enterprise-Grade Security:** PII Eraser is built with a minimal dependency tree and runs exclusively on CPUs, eliminating the management overhead and persistent patching cycles associated with GPU/CUDA vulnerabilities. Furthermore, it is built on a [Chainguard](https://www.chainguard.dev/) base image, minimizing CVEs at build time and providing a hardened attack surface that satisfies the most stringent enterprise DevSecOps requirements.
-* **Optimized Compute Performance:** Highly optimized for modern x86 architectures (e.g., AWS c8a instances), delivering over 5000 tokens/s on a 8 vCPU instance.
+* **Global & Europe-First Localization:** Built with native, deep support for [European languages](https://docs.piieraser.ai/user_guide/languages/) and data formats (DACH, FR, IT, Benelux) alongside comprehensive US/CA/AU/UK coverage.
+* **Industry Leading Accuracy:** PII Eraser uses the latest transformer technology to detect [over 60 sensitive entity types](https://docs.piieraser.ai/user_guide/entity_types/). This delivers higher accuracy than legacy regex or ML-based detectors, particularly on real world data that doesn't fit rigid formats or contain PII type descriptors (e.g. "My credit card number is ..").
+* **Drop-In Presidio Replacement:** Fully compatible with Microsoft Presidio Analyzer workflows, allowing you to upgrade your detection accuracy and performance without rewriting your application logic. Learn more in the [Presidio Compatibility Guide](https://docs.piieraser.ai/user_guide/presidio/).
+* **LLM & GenAI Ready:** [Native OpenAI-format chat support](https://docs.piieraser.ai/user_guide/chats/) for detecting and anonymizing PII in chats before they are sent to external LLM providers.
+* **Enterprise-Grade Security:** PII Eraser is built with a minimal dependency tree and runs exclusively on CPUs, eliminating the management overhead and persistent patching cycles associated with GPU/CUDA vulnerabilities. Built on a [Chainguard](https://www.chainguard.dev/) base image to minimize CVEs at build time and provide a hardened attack surface, PII Eraser is designed for the most stringent [Enterprise DevSecOps requirements](https://docs.piieraser.ai/installation/security/).
+* **Optimized Compute Performance:** Highly optimized for modern x86 architectures (e.g., AWS c8a instances), delivering over 5000 tokens/s on a 8 vCPU instance. See our [Hardware & Benchmarks](https://docs.piieraser.ai/installation/benchmarks/) page for details.
 
 ## Repository Contents
 
-This repository is designed to help you quickly deploy and integrate PII Eraser into your existing infrastructure:
+This repository is designed to help you quickly [deploy](https://docs.piieraser.ai/installation/introduction/) and integrate PII Eraser into your existing infrastructure:
 
 * `/examples` - API usage examples and sample `config.yaml` files.
-* `/deploy` - Deployment templates, including AWS CloudFormation templates for deploying on ECS and EC2.
+* `/deploy` - Deployment templates, including [AWS CloudFormation for ECS/EC2](https://docs.piieraser.ai/installation/aws/). Please visit the docs for [Docker Compose](https://docs.piieraser.ai/installation/docker/#docker-compose) and [Kubernetes](https://docs.piieraser.ai/installation/other/#kubernetes).
 
 ## Quick Start Example
 
-Once your PII Eraser container is running (see the deployment templates in this repo), you can interact with the REST API to redact text instantly.
+Once your PII Eraser container is running, you can interact with the [REST API](https://docs.piieraser.ai/api/) to redact text instantly.
 
 **Request:**
 ```bash
@@ -69,19 +75,19 @@ curl -X 'POST' \
 }
 ```
 
-Please visit the [docs](https://docs.piieraser.ai/#core-capabilities) for more.
+Please visit the [Processing Text guide](https://docs.piieraser.ai/user_guide/text/) and the [Processing Chats guide](https://docs.piieraser.ai/user_guide/chats/) for more details.
 
 ## Security
 
-We take the security of your data seriously. PII Eraser is stateless and designed to operate completely offline and air-gapped, with no usage data or telemetry sent back.
+We take the security of your data seriously. PII Eraser is stateless and designed to operate completely offline and air-gapped. For more details on our security architecture, visit our [Security Documentation](https://docs.piieraser.ai/installation/security/).
 
-If you discover a security vulnerability in the deployment templates or the container itself, please review our [Security Policy](SECURITY.md) for instructions on how to securely report it. **Do not open public issues for security vulnerabilities.**
+If you discover a security vulnerability, please review our [Security Policy](SECURITY.md) for instructions on how to securely report it. **Do not open public issues for security vulnerabilities.**
 
 ## License
 
 The code and deployment templates in this repository are licensed under the Apache 2.0 License.
 
-The PII Eraser container image itself is proprietary software licensed via cloud marketplaces or via contract. Usage of the container is subject to the terms of service provided at the time of subscription.
+The PII Eraser container image itself is proprietary software. See [Third Party Licenses](https://docs.piieraser.ai/third_party_licenses/) for information on bundled open-source components.
 
 ## Support
 
