@@ -17,7 +17,7 @@
 
 PII Eraser is a high-performance, self-hosted container providing a REST API for the detection, redaction, and masking of Personally Identifiable Information (PII) and confidential entities. 
 
-Designed specifically for compliance-heavy environments including [Financial Services](https://piieraser.ai/solutions/finance), [Insurance](https://piieraser.ai/solutions/insurance) and [Legal](https://piieraser.ai/solutions/legal), PII Eraser processes raw text strings and OpenAI-format chats entirely within your own infrastructure, ensuring sensitive data never leaves your environment.
+Designed specifically for compliance-heavy environments including [Financial Services](https://piieraser.ai/solutions/finance), [Insurance](https://piieraser.ai/solutions/insurance) and [Legal](https://piieraser.ai/solutions/legal), PII Eraser processes [text strings](https://docs.piieraser.ai/user_guide/text/) and [OpenAI-format chats](https://docs.piieraser.ai/user_guide/chats/) entirely within your own infrastructure, ensuring sensitive data never leaves your environment.
 
 > **Note:** This repository contains the official deployment templates and integration examples for PII Eraser. The core container image is commercially licensed.
 
