@@ -3,7 +3,7 @@
 At PII Eraser, security and data privacy are foundational to our product. We take all security vulnerabilities seriously and appreciate the efforts of the security community and our customers in helping us maintain an enterprise-grade standard.
 
 ## Security Posture
-PII Eraser is designed for high-compliance environments (Finance, Healthcare, Legal) and deploys as a single, stateless container. PII Eraser is designed to run in air gapped environments with no external internet access and no information of any kind is transmitted back to PII Eraser. 
+PII Eraser is designed for high-compliance environments (Financial Services, Insurance, Legal) and deploys as a single, stateless container. PII Eraser is designed to run in air gapped environments with no external internet access and no information of any kind is transmitted back to PII Eraser. 
 
 To minimize our attack surface, the PII Eraser container is built on [Chainguard](https://www.chainguard.dev/) base images, ensuring a minimal footprint with zero known CVEs at the time of build. 
 
