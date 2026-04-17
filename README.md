@@ -35,7 +35,7 @@ Designed specifically for compliance-heavy environments including [Financial Ser
 This repository is designed to help you quickly [deploy](https://docs.piieraser.ai/installation/introduction/) and integrate PII Eraser into your existing infrastructure:
 
 * `/examples` - API usage examples and sample `config.yaml` files.
-* `/deploy` - Deployment templates, including [AWS CloudFormation](https://docs.piieraser.ai/installation/aws/) for ECS/EC2. Please visit the docs for [Docker Compose](https://docs.piieraser.ai/installation/docker/#docker-compose) and [Kubernetes](https://docs.piieraser.ai/installation/other/#kubernetes).
+* `/deploy` - Deployment templates, including [AWS CloudFormation for ECS/EC2](https://docs.piieraser.ai/installation/aws/). Please visit the docs for [Docker Compose](https://docs.piieraser.ai/installation/docker/#docker-compose) and [Kubernetes](https://docs.piieraser.ai/installation/other/#kubernetes).
 
 ## Quick Start Example
 
