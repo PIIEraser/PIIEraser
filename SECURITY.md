@@ -5,7 +5,7 @@ At PII Eraser, security and data privacy are foundational to our product. We tak
 ## Security Posture
 PII Eraser is designed for high-compliance environments (Financial Services, Insurance, Legal) and deploys as a single, stateless container. PII Eraser is designed to run in air gapped environments with no external internet access and no information of any kind is transmitted back to PII Eraser. 
 
-To minimize our attack surface, the PII Eraser container is built on [Chainguard](https://www.chainguard.dev/) base images, ensuring a minimal footprint with zero known CVEs at the time of build. 
+To minimize our attack surface, the PII Eraser container is built on a [Chainguard](https://www.chainguard.dev/) base image, ensuring a minimal footprint with zero or close to zero known CVEs at the time of build. 
 
 *Note: This repository primarily contains deployment templates (e.g., AWS CloudFormation) and usage examples. The core PII Eraser container is distributed securely via cloud marketplaces and PII Eraser's container repository.*
 

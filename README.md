@@ -2,7 +2,7 @@
   <h1>
     PII Eraser
   </h1>
-  <p><b>Enterprise-grade PII detection and anonymization for modern data workflows.</b></p>
+  <p><b>Self-hosted PII detection and anonymization for modern data workflows and LLM guardrails.</b></p>
 
   <p>
     <a href="https://docs.piieraser.ai"><strong>📖 Documentation</strong></a> |
@@ -26,8 +26,8 @@ Designed specifically for compliance-heavy environments including [Financial Ser
 * **Global & Europe-First Localization:** Built with native, deep support for [European languages](https://docs.piieraser.ai/user_guide/languages/) and data formats (DACH, FR, IT, Benelux) alongside comprehensive US/CA/AU/UK coverage.
 * **Industry Leading Accuracy:** PII Eraser uses the latest transformer technology to detect [over 60 sensitive entity types](https://docs.piieraser.ai/user_guide/entity_types/). This delivers higher accuracy than legacy regex or ML-based detectors, particularly on real world data that doesn't fit rigid formats or contain PII type descriptors (e.g. "My credit card number is ..").
 * **Drop-In Presidio Replacement:** Fully compatible with Microsoft Presidio Analyzer workflows, allowing you to upgrade your detection accuracy and performance without rewriting your application logic. Learn more in the [Presidio Compatibility Guide](https://docs.piieraser.ai/user_guide/presidio/).
-* **LLM & GenAI Ready:** [Native OpenAI-format chat support](https://docs.piieraser.ai/user_guide/chats/) for detecting and anonymizing PII in chats before they are sent to external LLM providers.
-* **Enterprise-Grade Security:** PII Eraser is built with a minimal dependency tree and runs exclusively on CPUs, eliminating the management overhead and persistent patching cycles associated with GPU/CUDA vulnerabilities. Built on a [Chainguard](https://www.chainguard.dev/) base image to minimize CVEs at build time and provide a hardened attack surface, PII Eraser is designed for the most stringent [Enterprise DevSecOps requirements](https://docs.piieraser.ai/installation/security/).
+* **Easy GenAI Guardrails:** Leverage [native OpenAI-format chat support](https://docs.piieraser.ai/user_guide/chats/) for detecting and anonymizing PII in chats before they are sent to external LLM providers.
+* **Enterprise-Grade Security:** PII Eraser is built with a minimal dependency tree and runs exclusively on CPUs, eliminating the management overhead and persistent patching cycles associated with GPU/CUDA vulnerabilities. Built on a [Chainguard](https://www.chainguard.dev/) base image to minimize CVEs at build time and provide a hardened attack surface, PII Eraser is designed for the most stringent [Enterprise DevSecOps requirements](https://docs.piieraser.ai/security-compliance/security/).
 * **Optimized Compute Performance:** Highly optimized for modern x86 architectures (e.g., AWS c8a instances), delivering over 5000 tokens/s on a 8 vCPU instance. See our [Hardware & Benchmarks](https://docs.piieraser.ai/installation/benchmarks/) page for details.
 
 ## Repository Contents
@@ -79,7 +79,7 @@ Please visit the [Processing Text guide](https://docs.piieraser.ai/user_guide/te
 
 ## Security
 
-We take the security of your data seriously. PII Eraser is stateless and designed to operate completely offline and air-gapped. For more details on our security architecture, visit our [Security Documentation](https://docs.piieraser.ai/installation/security/).
+We take the security of your data seriously. PII Eraser is stateless and designed to operate completely offline and air-gapped. For more details on our security architecture, visit our [Security Documentation](https://docs.piieraser.ai/security-compliance/security/).
 
 If you discover a security vulnerability, please review our [Security Policy](SECURITY.md) for instructions on how to securely report it. **Do not open public issues for security vulnerabilities.**
 
