@@ -6,10 +6,10 @@ This directory contains Python scripts and code snippets demonstrating how to in
 
 | Script | Description |
 | :--- | :--- |
-| `simple_example.py` | Minimal getting-started example. Send a single request and print the result. |
-| `api_best_practices.py` | High-volume best practices: batching, persistent connections, and concurrency. |
-| `streaming_pipeline.py` | Memory-efficient generator pipeline for arbitrarily large datasets (JSONL, database cursors, queues, etc.). |
-| `openai_chat_pii_firewall.py` | Remove PII and other sensitive entities from an OpenAI-format conversation via the `/chat/transform` endpoint and forward it to an OpenAI-compatible LLM provider (OpenRouter in this example). |
+| [`simple_example.py`](./simple_example.py) | The quickest way to verify your PII Eraser deployment is working. Sends a single request and prints the redacted text. |
+| [`api_best_practices.py`](./api_best_practices.py) | Demonstrates high-volume best practices: batching to reduce network overhead, persistent connections via `requests.Session()` for HTTP Keep-Alive, and concurrency with `ThreadPoolExecutor` to saturate processing capabilities. |
+| [`streaming_pipeline.py`](./streaming_pipeline.py) | A memory-efficient, generator-based pipeline for processing arbitrarily large datasets (JSONL, database cursors, message queues) without loading everything into memory. |
+| [`openai_chat_pii_firewall.py`](./openai_chat_pii_firewall.py) | Uses the [`/chat/transform`](https://docs.piieraser.ai/user_guide/chats/) endpoint to strip PII from an OpenAI-format conversation before forwarding it to an OpenAI-compatible LLM provider (OpenRouter in this example). |
 
 ### `simple_example.py`
 
@@ -35,9 +35,7 @@ Shows how to use the [`/chat/transform`](https://docs.piieraser.ai/user_guide/ch
 
 ## Prerequisites
 
-To run the examples in this directory, you will need Python 3.10+ and the `requests` library.
-
-Install the required dependencies using `pip`:
+To run the examples in this directory, you will need Python 3.10+ and the `requests` library:
 
 ```shell
 pip install requests

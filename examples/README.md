@@ -6,7 +6,9 @@ PII Eraser is built to handle complex, multi-regional compliance requirements ou
 
 ## Directory Structure
 
-* [`/configs`](./configs) - Contains `config.yaml` files demonstrating how to configure PII Eraser for different enterprise scenarios (e.g., M&A deal rooms, legal tech, claims processing, and ASR transcript masking).
-* [`/python`](./python) - Contains code snippets and scripts illustrating how to efficiently interact with the PII Eraser REST API using Python.
+| Directory | Description |
+| :--- | :--- |
+| [`/configs`](./configs) | Contains `config.yaml` files demonstrating how to configure PII Eraser for different enterprise scenarios (e.g., M&A deal rooms, legal tech, claims processing, and ASR transcript masking). |
+| [`/python`](./python) | Contains code snippets and scripts illustrating how to efficiently interact with the PII Eraser REST API using Python. |
 
 For complete documentation on all available parameters, entity types, and API endpoints, please visit the [PII Eraser Documentation](https://docs.piieraser.ai/).
