@@ -7,7 +7,7 @@ This directory contains Python scripts and code snippets demonstrating how to in
 | [`simple_example.py`](./simple_example.py) | The quickest way to verify your PII Eraser deployment is working. Sends a single request and prints the redacted text. |
 | [`api_best_practices.py`](./api_best_practices.py) | Demonstrates high-volume best practices: batching to reduce network overhead, persistent connections via `requests.Session()` for HTTP Keep-Alive, and concurrency with `ThreadPoolExecutor` to saturate processing capabilities. |
 | [`streaming_pipeline.py`](./streaming_pipeline.py) | A memory-efficient, generator-based pipeline for processing arbitrarily large datasets (JSONL, database cursors, message queues) without loading everything into memory. Useful as a building block for production ETL and data pipelines. |
-| [`openai_chat_pii_firewall.py`](./openai_chat_pii_firewall.py) | Uses the [`/chat/transform`](https://docs.piieraser.ai/user_guide/chats/) endpoint to strip PII from an OpenAI Chat Completions-format conversation before forwarding it to an OpenAI-compatible LLM provider (OpenRouter in this example).. This is the recommended pattern for teams using PII Eraser as a privacy gateway or PII guardrail in front of cloud LLM providers. |
+| [`openai_chat_pii_firewall.py`](./openai_chat_pii_firewall.py) | Uses the [`/chat/transform`](https://docs.piieraser.ai/user-guide/chats/) endpoint to strip PII from an OpenAI Chat Completions-format conversation before forwarding it to an OpenAI-compatible LLM provider (OpenRouter in this example).. This is the recommended pattern for teams using PII Eraser as a privacy gateway or PII guardrail in front of cloud LLM providers. |
 
 ## Prerequisites
 
