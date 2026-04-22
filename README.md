@@ -89,7 +89,7 @@ If you discover a security vulnerability, please review our [Security Policy](SE
 
 The code and deployment templates in this repository are licensed under the Apache 2.0 License.
 
-The PII Eraser container image itself is proprietary software. See [Third Party Licenses](https://docs.piieraser.ai/third_party_licenses/) for information on bundled open-source components.
+The PII Eraser container image itself is proprietary software. See [Third Party Licenses](https://docs.piieraser.ai/third-party-licenses/) for information on bundled open-source components.
 
 ## Support
 
