@@ -157,12 +157,12 @@ else
 fi
 
 aws cloudformation deploy \
-  --template-file packaged-deploy.yaml \
-  --stack-name $STACK_NAME \
-  --parameter-overrides $PARAMS \
-  --region $REGION \
-  --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
-  $DEPLOY_ARGS
+    --template-file packaged-deploy.yaml \
+    --stack-name $STACK_NAME \
+    --parameter-overrides $PARAMS \
+    --region $REGION \
+    --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+    $DEPLOY_ARGS
 
 # 8. Output Results
 if [ "$DEPLOY_MODE" == "1" ]; then

@@ -1,6 +1,6 @@
 # pii_eraser/deploy/aws/vpc.yaml
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'PII Eraser: Secure VPC Setup (Private Network with Outbound Access)'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "PII Eraser: Secure VPC Setup (Private Network with Outbound Access)"
 
 Parameters:
   EnvironmentName:
@@ -45,7 +45,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: 10.0.1.0/24
       MapPublicIpOnLaunch: true
       Tags:
@@ -56,7 +56,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      AvailabilityZone: !Select [1, !GetAZs ""]
       CidrBlock: 10.0.2.0/24
       MapPublicIpOnLaunch: true
       Tags:
@@ -70,7 +70,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [0, !GetAZs ""]
       CidrBlock: 10.0.10.0/24
       MapPublicIpOnLaunch: false
       Tags:
@@ -81,7 +81,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
-      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      AvailabilityZone: !Select [1, !GetAZs ""]
       CidrBlock: 10.0.20.0/24
       MapPublicIpOnLaunch: false
       Tags:
@@ -163,7 +163,7 @@ Outputs:
     Value: !Ref VPC
     Export:
       Name: !Sub "${EnvironmentName}-VpcId"
-  
+
   PrivateSubnetIds:
     Description: The IDs of the private subnets.
     Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]

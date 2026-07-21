@@ -1,10 +1,10 @@
 # ==============================================================================
-# PII Eraser config.yaml Example: 
+# PII Eraser config.yaml Example:
 # German Call Centre & ASR Processing
 # ==============================================================================
 # Context: Processing customer service transcripts where agents handle payments,
 # account updates, and general inquiries.
-# Goal: Strictly mask Payment Card Industry (PCI DSS) data and sensitive personal 
+# Goal: Strictly mask Payment Card Industry (PCI DSS) data and sensitive personal
 # contact info using standard ASR masking characters.
 # ==============================================================================
 
@@ -13,16 +13,16 @@ operator: mask
 
 # Mask with "*" instead of the default "#"
 mask_config:
-  mask_char: '*'
+  mask_char: "*"
 
 # Enabled entity types.
 entity_types:
-  - PAYMENT_CARD             # Includes local Girocard and EC-Karte numbers by default
+  - PAYMENT_CARD # Includes local Girocard and EC-Karte numbers by default
   - PAYMENT_CARD_EXPIRATION
   - CVV
-  - BANK_ACCOUNT             # This catches European IBANs
+  - BANK_ACCOUNT # This catches European IBANs
   - BANK_ID
-  - ADDRESS                  # Use ADDRESS instead of LOCATION so that broad location references such as "Frankfurt" and "Germany" aren't removed
+  - ADDRESS # Use ADDRESS instead of LOCATION so that broad location references such as "Frankfurt" and "Germany" aren't removed
   - PHONE
   - EMAIL
   - NAME
