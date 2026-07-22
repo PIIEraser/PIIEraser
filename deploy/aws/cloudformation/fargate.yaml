@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'PII Eraser: Fargate Service Stack'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "PII Eraser: Fargate Service Stack"
 
 Parameters:
   SubnetIds:
@@ -20,7 +20,7 @@ Parameters:
     Type: Number
   ComputeType:
     Type: String
-  
+
   # Imported Resources
   ClusterName:
     Type: String
@@ -55,7 +55,7 @@ Resources:
         OperatingSystemFamily: LINUX
       ExecutionRoleArn: !Ref TaskExecutionRoleArn
       TaskRoleArn: !Ref TaskRoleArn
-      
+
       Volumes:
         - Name: tmp-volume
 
@@ -65,18 +65,18 @@ Resources:
           Essential: true
           PortMappings:
             - ContainerPort: 8000
-          
+
           # Security: Read-Only Root Filesystem & Drop Capabilities
           ReadonlyRootFilesystem: true
           LinuxParameters:
             Capabilities:
               Drop:
                 - ALL # Security: container has no root capabilities
-          
+
           MountPoints:
             - SourceVolume: tmp-volume
               ContainerPath: /tmp
-          
+
           Environment:
             - Name: CONFIG_B64
               Value: !Ref Base64Config
@@ -89,7 +89,7 @@ Resources:
             Timeout: 5
             Retries: 3
             StartPeriod: 120
-          
+
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -104,20 +104,20 @@ Resources:
       ServiceName: !Sub "${AWS::StackName}-service"
       Cluster: !Ref ClusterArn
       TaskDefinition: !Ref TaskDefinition
-      
+
       EnableExecuteCommand: false
 
       CapacityProviderStrategy:
         - CapacityProvider: !If [IsSpot, "FARGATE_SPOT", "FARGATE"]
           Weight: 1
           Base: 0
-      
+
       HealthCheckGracePeriodSeconds: 120
 
       # Zero Downtime Strategy
       DeploymentConfiguration:
-        MaximumPercent: 200         # Allow temporarily doubling tasks (e.g., 3 -> 6)
-        MinimumHealthyPercent: 100  # Do not kill old tasks until new ones are healthy
+        MaximumPercent: 200 # Allow temporarily doubling tasks (e.g., 3 -> 6)
+        MinimumHealthyPercent: 100 # Do not kill old tasks until new ones are healthy
         DeploymentCircuitBreaker:
           Enable: true
           Rollback: true

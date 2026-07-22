@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'PII Eraser: EC2 Service Stack'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "PII Eraser: EC2 Service Stack"
 
 Parameters:
   VpcId:
@@ -25,7 +25,7 @@ Parameters:
   InstanceType:
     Type: String
     Default: c8i.xlarge
-   
+
   # Imported Resources
   ClusterName:
     Type: String
@@ -63,7 +63,7 @@ Resources:
         InstanceType: !Ref InstanceType
         IamInstanceProfile:
           Arn: !GetAtt Ec2InstanceProfile.Arn
-        SecurityGroupIds: 
+        SecurityGroupIds:
           - !Ref ContainerSecurityGroup
         UserData:
           Fn::Base64: !Sub |
@@ -89,7 +89,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal: { Service: ec2.amazonaws.com }
@@ -118,13 +118,13 @@ Resources:
           OnDemandBaseCapacity: !If [IsSpot, 0, 1]
           OnDemandPercentageAboveBaseCapacity: !If [IsSpot, 0, 100]
           SpotAllocationStrategy: price-capacity-optimized
-      MinSize: "0" 
-      MaxSize: !Ref MaxContainers 
+      MinSize: "0"
+      MaxSize: !Ref MaxContainers
       Tags:
         - Key: AmazonECSManaged
           Value: true
           PropagateAtLaunch: true
-    
+
     UpdatePolicy:
       AutoScalingRollingUpdate:
         MinInstancesInService: 0
@@ -139,7 +139,7 @@ Resources:
         AutoScalingGroupArn: !Ref AutoScalingGroup
         ManagedScaling:
           Status: ENABLED
-          TargetCapacity: 100 
+          TargetCapacity: 100
           MinimumScalingStepSize: 1
           MaximumScalingStepSize: 10
         ManagedTerminationProtection: DISABLED
@@ -167,7 +167,7 @@ Resources:
         OperatingSystemFamily: LINUX
       ExecutionRoleArn: !Ref TaskExecutionRoleArn
       TaskRoleArn: !Ref TaskRoleArn
-      
+
       Volumes:
         - Name: tmp-volume
 
@@ -177,10 +177,10 @@ Resources:
           Essential: true
           PortMappings:
             - ContainerPort: 8000
-          
+
           # Prevent malware persistence by making the root FS read-only
           ReadonlyRootFilesystem: true
-          
+
           # Drop all Linux capabilities (root powers) to minimize breakout risk
           LinuxParameters:
             Capabilities:
@@ -196,7 +196,7 @@ Resources:
           MountPoints:
             - SourceVolume: tmp-volume
               ContainerPath: /tmp
-          
+
           Environment:
             - Name: CONFIG_B64
               Value: !Ref Base64Config
@@ -209,7 +209,7 @@ Resources:
             Timeout: 5
             Retries: 3
             StartPeriod: 120
-          
+
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -225,23 +225,23 @@ Resources:
       ServiceName: !Sub "${AWS::StackName}-service"
       Cluster: !Ref ClusterArn
       TaskDefinition: !Ref TaskDefinition
-      
+
       EnableExecuteCommand: false
 
       CapacityProviderStrategy:
         - CapacityProvider: !Ref CapacityProvider
           Weight: 1
-      
+
       HealthCheckGracePeriodSeconds: 120
 
       # Zero Downtime Configuration
       DeploymentConfiguration:
-        MaximumPercent: 200         # Allow temporarily doubling tasks (e.g., 3 -> 6)
-        MinimumHealthyPercent: 100  # Do not kill old tasks until new ones are healthy
+        MaximumPercent: 200 # Allow temporarily doubling tasks (e.g., 3 -> 6)
+        MinimumHealthyPercent: 100 # Do not kill old tasks until new ones are healthy
         DeploymentCircuitBreaker:
           Enable: true
           Rollback: true
-      
+
       NetworkConfiguration:
         AwsvpcConfiguration:
           Subnets: !Ref SubnetIds
@@ -261,7 +261,7 @@ Resources:
       PlacementStrategies:
         - Type: spread
           Field: attribute:ecs.availability-zone
-      
+
   # --- Auto Scaling ---
   AutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget

@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'PII Eraser: Common Resources (LB, IAM, Cluster)'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "PII Eraser: Common Resources (LB, IAM, Cluster)"
 
 Parameters:
   VpcId:
@@ -17,7 +17,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal: { Service: ecs-tasks.amazonaws.com }
@@ -29,7 +29,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal: { Service: ecs-tasks.amazonaws.com }
@@ -54,7 +54,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 10.0.0.0/8  # Restrict this to your specific VPC CIDR or VPN IP range
+          CidrIp: 10.0.0.0/8 # Restrict this to your specific VPC CIDR or VPN IP range
 
   ContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -108,7 +108,7 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 3
-      Matcher: { HttpCode: '200' }
+      Matcher: { HttpCode: "200" }
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: !Ref RequestTimeout
@@ -132,12 +132,12 @@ Resources:
         - Name: containerInsights
           Value: enabled
 
-# --- Test Utilities (Lambda) ---
+  # --- Test Utilities (Lambda) ---
   TestLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Principal: { Service: lambda.amazonaws.com }

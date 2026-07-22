@@ -56,9 +56,9 @@ fi
 # We loop through all other parameters and explicitly tell CloudFormation to keep their current values.
 # This prevents the stack from reverting to defaults (e.g., switching back to Fargate from EC2).
 static_keys=(
-  "EnvironmentName" "CreateNewVpc" "ExistingVpcId" "ExistingSubnetIds"
-  "DeploymentPlatform" "ComputeType" "Ec2InstanceType" "ContainerCpu" "ContainerMemory"
-  "RequestTimeout"
+    "EnvironmentName" "CreateNewVpc" "ExistingVpcId" "ExistingSubnetIds"
+    "DeploymentPlatform" "ComputeType" "Ec2InstanceType" "ContainerCpu" "ContainerMemory"
+    "RequestTimeout"
 )
 
 for key in "${static_keys[@]}"; do

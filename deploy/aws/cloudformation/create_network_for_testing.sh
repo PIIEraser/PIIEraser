@@ -11,10 +11,10 @@ echo "Creating a standalone VPC using vpc.yaml..."
 # 1. Deploy the VPC Stack
 # We reuse the existing vpc.yaml but deploy it as a standalone stack
 aws cloudformation deploy \
-  --template-file vpc.yaml \
-  --stack-name $STACK_NAME \
-  --parameter-overrides EnvironmentName=$ENV_NAME \
-  --region $REGION
+    --template-file vpc.yaml \
+    --stack-name $STACK_NAME \
+    --parameter-overrides EnvironmentName=$ENV_NAME \
+    --region $REGION
 
 echo ""
 echo "✅ Network Stack Deployed."

@@ -1,5 +1,5 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'PII Eraser: One-Click Enterprise Deployment (Master Stack)'
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "PII Eraser: One-Click Enterprise Deployment (Master Stack)"
 
 Parameters:
   EnvironmentName:
@@ -28,9 +28,9 @@ Parameters:
   ImageUri:
     Type: String
     Description: "The container image URI."
-    MinLength: 5  # Enforces that the field cannot be empty
+    MinLength: 5 # Enforces that the field cannot be empty
     ConstraintDescription: "You must provide a valid Container Image URI."
-  
+
   DeploymentPlatform:
     Type: String
     Default: "FARGATE"
@@ -98,8 +98,18 @@ Resources:
       TemplateURL: ./common.yaml
       Parameters:
         StackNamePrefix: !Ref EnvironmentName
-        VpcId: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
-        SubnetIds: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.PrivateSubnetIds, !Join [",", !Ref ExistingSubnetIds]]
+        VpcId:
+          !If [
+            ShouldCreateVpc,
+            !GetAtt VpcStack.Outputs.VpcId,
+            !Ref ExistingVpcId,
+          ]
+        SubnetIds:
+          !If [
+            ShouldCreateVpc,
+            !GetAtt VpcStack.Outputs.PrivateSubnetIds,
+            !Join [",", !Ref ExistingSubnetIds],
+          ]
         RequestTimeout: !Ref RequestTimeout
 
   # 3a. Fargate Service Stack
@@ -109,7 +119,12 @@ Resources:
     Properties:
       TemplateURL: ./fargate.yaml
       Parameters:
-        SubnetIds: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.PrivateSubnetIds, !Join [",", !Ref ExistingSubnetIds]]
+        SubnetIds:
+          !If [
+            ShouldCreateVpc,
+            !GetAtt VpcStack.Outputs.PrivateSubnetIds,
+            !Join [",", !Ref ExistingSubnetIds],
+          ]
         ImageUri: !Ref ImageUri
         ContainerCpu: !Ref ContainerCpu
         ContainerMemory: !Ref ContainerMemory
@@ -134,8 +149,18 @@ Resources:
     Properties:
       TemplateURL: ./ec2.yaml
       Parameters:
-        VpcId: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
-        SubnetIds: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.PrivateSubnetIds, !Join [",", !Ref ExistingSubnetIds]]
+        VpcId:
+          !If [
+            ShouldCreateVpc,
+            !GetAtt VpcStack.Outputs.VpcId,
+            !Ref ExistingVpcId,
+          ]
+        SubnetIds:
+          !If [
+            ShouldCreateVpc,
+            !GetAtt VpcStack.Outputs.PrivateSubnetIds,
+            !Join [",", !Ref ExistingSubnetIds],
+          ]
         ImageUri: !Ref ImageUri
         ContainerCpu: !Ref ContainerCpu
         ContainerMemory: !Ref ContainerMemory
@@ -160,7 +185,8 @@ Outputs:
     Value: !GetAtt CommonStack.Outputs.ServiceUrl
   VpcId:
     Description: "The VPC ID where resources were deployed"
-    Value: !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
+    Value:
+      !If [ShouldCreateVpc, !GetAtt VpcStack.Outputs.VpcId, !Ref ExistingVpcId]
 
   ContainerSecurityGroup:
     Description: "The Security Group used by the containers"
