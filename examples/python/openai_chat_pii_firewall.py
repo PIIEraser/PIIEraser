@@ -18,9 +18,11 @@ Set your OpenRouter API key:
 """
 
 import os
+from typing import cast
 
 import requests
 from openai import OpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 PII_ERASER_URL = "http://localhost:8000"
 OPENROUTER_MODEL = "openai/gpt-5.4-nano"
@@ -87,7 +89,7 @@ def main():
 
     completion = client.chat.completions.create(
         model=OPENROUTER_MODEL,
-        messages=conversation_anonymized,
+        messages=cast(list[ChatCompletionMessageParam], conversation_anonymized),
     )
     assistant_reply = completion.choices[0].message.content
 

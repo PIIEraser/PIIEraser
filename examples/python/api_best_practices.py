@@ -16,8 +16,8 @@ def process_texts(session: requests.Session, batch: list[str]) -> dict:
 
 
 # --- Configuration ---
-CONCURRENCY = 8  # Target: 4 × number of PII Eraser instances
-BATCH_SIZE = 20  # 10–50 texts per request is a reasonable default
+CONCURRENCY = 8  # Target: 4x number of PII Eraser instances
+BATCH_SIZE = 20  # 10-50 texts per request is a reasonable default
 
 # Split texts into batches
 batches = [texts[i : i + BATCH_SIZE] for i in range(0, len(texts), BATCH_SIZE)]
