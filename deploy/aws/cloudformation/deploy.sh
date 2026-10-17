@@ -33,7 +33,7 @@ echo ""
 # --- Image URI Validation Loop ---
 IMAGE_URI=""
 while [[ -z "$IMAGE_URI" ]]; do
-    read -p "Enter Container Image URI (Required): " IMAGE_URI
+    read -rp "Enter Container Image URI (Required): " IMAGE_URI
     if [[ -z "$IMAGE_URI" ]]; then
         echo "⚠️  Image URI cannot be empty. Please enter a valid URI (e.g., public.ecr.aws/your-org/pii-eraser:latest)."
     fi
@@ -44,24 +44,24 @@ echo ""
 echo "Choose Network Strategy:"
 echo "1) Create a NEW secure VPC (Recommended for testing)"
 echo "2) Deploy into EXISTING VPC"
-read -p "Selection [1]: " NET_CHOICE
+read -rp "Selection [1]: " NET_CHOICE
 NET_CHOICE=${NET_CHOICE:-1}
 
 echo ""
 echo "Choose Compute Platform:"
 echo "1) Fargate (Serverless)"
 echo "2) EC2 (Ensures high performance instance types)"
-read -p "Selection [1]: " COMPUTE_CHOICE
+read -rp "Selection [1]: " COMPUTE_CHOICE
 COMPUTE_CHOICE=${COMPUTE_CHOICE:-1}
 
 echo ""
-read -p "Enter Minimum Containers [1]: " MIN_CONTAINERS
+read -rp "Enter Minimum Containers [1]: " MIN_CONTAINERS
 MIN_CONTAINERS=${MIN_CONTAINERS:-1}
 
 if [ "$MIN_CONTAINERS" -eq 0 ]; then
     echo "⚠️  You selected 0 containers."
     echo "   Setting to 0 means you must use 'manage_service.py' to manually start and stop the service."
-    read -p "   Are you sure? (y/n): " CONFIRM_ZERO
+    read -rp "   Are you sure? (y/n): " CONFIRM_ZERO
     if [ "$CONFIRM_ZERO" != "y" ]; then
         echo "   Reverting to default (1)."
         MIN_CONTAINERS=1
@@ -72,7 +72,7 @@ echo ""
 echo "Deployment Mode:"
 echo "1) 🚀 Deploy Live"
 echo "2) 🧪 Dry Run (Create Change Set)"
-read -p "Selection [1]: " DEPLOY_MODE
+read -rp "Selection [1]: " DEPLOY_MODE
 DEPLOY_MODE=${DEPLOY_MODE:-1}
 
 # 4. Parameter Construction
@@ -91,8 +91,8 @@ fi
 NET_DISPLAY="New Secure VPC"
 if [ "$NET_CHOICE" == "2" ]; then
     echo ""
-    read -p "Enter VPC ID: " VPC_ID
-    read -p "Enter Private Subnet IDs (comma separated): " SUBNET_IDS
+    read -rp "Enter VPC ID: " VPC_ID
+    read -rp "Enter Private Subnet IDs (comma separated): " SUBNET_IDS
     PARAMS="$PARAMS CreateNewVpc=false ExistingVpcId=$VPC_ID ExistingSubnetIds=$SUBNET_IDS"
     NET_DISPLAY="Existing VPC ($VPC_ID) Existing Subnet Ids ($SUBNET_IDS)"
 else
@@ -104,7 +104,7 @@ echo ""
 echo "--- S3 Setup for Templates ---"
 ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text --region $REGION)
 DEFAULT_BUCKET="pii-eraser-deploy-${ACCOUNT_ID}-${REGION}"
-read -p "Enter S3 Bucket for artifacts [$DEFAULT_BUCKET]: " ARTIFACT_BUCKET
+read -rp "Enter S3 Bucket for artifacts [$DEFAULT_BUCKET]: " ARTIFACT_BUCKET
 ARTIFACT_BUCKET=${ARTIFACT_BUCKET:-$DEFAULT_BUCKET}
 
 # 6. Confirmation Summary
@@ -122,7 +122,7 @@ echo "Min Containers:  $MIN_CONTAINERS"
 echo "Mode:            $([ "$DEPLOY_MODE" == "1" ] && echo "🚀 Live Deployment" || echo "🧪 Dry Run")"
 echo "S3 Bucket:       $ARTIFACT_BUCKET"
 echo "=========================================="
-read -p "Proceed with deployment? (y/n): " CONFIRM
+read -rp "Proceed with deployment? (y/n): " CONFIRM
 if [ "$CONFIRM" != "y" ]; then
     echo "Aborted by user."
     exit 0
@@ -156,6 +156,7 @@ else
     echo "Deploying Stack... (This will take some minutes)"
 fi
 
+# shellcheck disable=SC2086 # PARAMS and DEPLOY_ARGS hold multiple words
 aws cloudformation deploy \
     --template-file packaged-deploy.yaml \
     --stack-name $STACK_NAME \
