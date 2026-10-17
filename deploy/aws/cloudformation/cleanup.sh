@@ -14,7 +14,7 @@ echo "1. Service is scaled to 0 instances."
 echo "2. Any external resources that reference this stack have been deleted."
 echo "   (Examples: Manually created Security Groups, or test instances)."
 echo ""
-read -p "Are you sure you want to proceed? (y/n): " CONFIRM
+read -rp "Are you sure you want to proceed? (y/n): " CONFIRM
 
 if [ "$CONFIRM" != "y" ]; then
     echo "Aborted."
